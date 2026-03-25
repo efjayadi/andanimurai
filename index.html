@@ -54,9 +54,11 @@
             left: 50%;
             transform: translate(-50%, -50%);
             width: 80%;
-            opacity: 0.03;
+            max-width: 800px;
+            opacity: 0.05;
             pointer-events: none;
             z-index: 1;
+            object-fit: contain;
         }
 
         .section-padding { padding: 150px 0; }
@@ -79,23 +81,41 @@
                 object-position: center bottom; /* Fokus ke tengah dan bawah */
             }
         }
+        
+        /* Efek Spidol Merah */
+        .marker-bg {
+            position: relative;
+            display: inline-block;
+            z-index: 1;
+        }
+        .marker-bg::after {
+            content: '';
+            position: absolute;
+            bottom: 8px; /* Mengatur ketinggian garis dari bawah teks */
+            left: -2%;
+            width: 104%;
+            height: 12px;
+            background-color: var(--brand-red);
+            z-index: -1;
+            transform: rotate(-1.5deg); /* Membuat coretan sedikit miring alami */
+            border-radius: 6px 14px 8px 4px; /* Sudut asimetris mirip coretan asli */
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
 
-    <svg class="wayang-bg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path d="M50 20 C30 20 20 40 20 60 C20 80 40 95 50 95 C60 95 80 80 80 60 C80 40 70 20 50 20 M45 35 Q50 30 55 35" fill="white" />
-    </svg>
+    <img src="semar.png" alt="Semar Background" class="wayang-bg">
 
     <nav class="fixed top-0 w-full z-[100] px-4 md:px-10 py-6 md:py-10 flex flex-col md:flex-row justify-between items-center bg-gradient-to-b from-[#030a16] via-[#030a16]/80 to-transparent gap-4 md:gap-0">
         <a href="#" class="text-lg md:text-xl font-extrabold tracking-[0.3em] md:tracking-[0.4em] serif uppercase text-center">
             ANDANI <span class="text-[var(--brand-red)]">MURAI</span>
         </a>
         <div class="flex justify-center gap-3 md:gap-12 text-[8px] sm:text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.5em] font-bold opacity-90 md:opacity-60">
-            <a href="#filosofi" class="hover:text-[var(--brand-red)] transition-colors">Filosofi</a>
-            <a href="#siklus" class="hover:text-[var(--brand-red)] transition-colors">Proses</a>
-            <a href="#galeri" class="hover:text-[var(--brand-red)] transition-colors">Prestasi</a>
-            <a href="#kontak" class="hover:text-[var(--brand-red)] transition-colors">Hubungi</a>
+            <a href="#filosofi" class="nav-item hover:text-[var(--brand-red)] transition-all duration-300">Filosofi</a>
+            <a href="#siklus" class="nav-item hover:text-[var(--brand-red)] transition-all duration-300">Proses</a>
+            <a href="#galeri" class="nav-item hover:text-[var(--brand-red)] transition-all duration-300">Prestasi</a>
+            <a href="#kontak" class="nav-item hover:text-[var(--brand-red)] transition-all duration-300">Hubungi</a>
         </div>
     </nav>
 
@@ -152,13 +172,13 @@
     <!-- Siklus Penetasan -->
     <section id="siklus" class="section-padding px-10 md:px-32">
         <div class="text-center mb-20">
-            <h2 class="serif text-6xl">Saking Endhog, <br><span class="text-gray-500 italic">Tumeka Jawara.</span></h2>
+            <h2 class="serif text-6xl">Saking Endhog, <br><span class="text-white italic marker-bg">Tumeka Jawara.</span></h2>
         </div>
         <div class="grid md:grid-cols-3 gap-10">
             <div class="text-center p-10 border border-white/5 glass-card">
                 <div class="text-4xl serif text-[var(--brand-red)] mb-4">01</div>
                 <h4 class="font-bold mb-4 uppercase tracking-tighter">Seleksi Indukan</h4>
-                <p class="text-sm text-gray-400">Hanya menggunakan pejantan dengan sertifikat juara Nasional.</p>
+                <p class="text-sm text-gray-400">Hanya menggunakan pejantan dengan sertifikat juara.</p>
             </div>
             <div class="text-center p-10 border border-white/5 glass-card">
                 <div class="text-4xl serif text-[var(--brand-red)] mb-4">02</div>
@@ -177,7 +197,7 @@
     <section id="galeri" class="section-padding bg-black/40">
         <div class="px-10 md:px-32 mb-16">
             <h3 class="serif text-4xl">Panggung Kemenangan</h3>
-            <p class="text-gray-500 mt-2">Koleksi trofi dari berbagai gelaran Nasional.</p>
+            <p class="text-gray-500 mt-2">Koleksi trofi dari berbagai gelaran.</p>
         </div>
         <div class="flex overflow-x-auto gap-8 px-10 pb-10 scrollbar-hide">
             <div class="min-w-[300px] h-[400px] bg-gray-900 flex items-end p-8 border border-white/10">
@@ -211,7 +231,7 @@
             </div>
             <div class="flex flex-col justify-end items-end text-right">
                 <p class="text-xs text-gray-500 italic mb-4">"Mulat Sariro, Hangroso Wani."</p>
-                <p class="text-[10px] uppercase tracking-[0.5em] text-white">© 2024 ANDANI MURAI EXCELLENCE</p>
+                <p class="text-[10px] uppercase tracking-[0.5em] text-white">© 2026 ANDANI MURAI</p>
             </div>
         </div>
     </footer>
@@ -333,6 +353,38 @@
                 attemptPlay();
             }
         }, 1500);
+
+        // --- Fitur Active Link Otomatis Saat Di-Scroll ---
+        const sections = document.querySelectorAll("section[id], footer[id]");
+        const navItems = document.querySelectorAll(".nav-item");
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '-30% 0px -50% 0px', // Memicu deteksi ketika konten berada di tengah layar
+            threshold: 0
+        };
+
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    
+                    // Hapus warna merah dari semua menu
+                    navItems.forEach(link => {
+                        link.classList.remove('text-[var(--brand-red)]', 'opacity-100');
+                        
+                        // Beri warna merah untuk menu yang bagiannya sedang aktif/terlihat
+                        if (link.getAttribute('href') === `#${id}`) {
+                            link.classList.add('text-[var(--brand-red)]', 'opacity-100');
+                        }
+                    });
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => {
+            scrollObserver.observe(section);
+        });
 
     </script>
 
