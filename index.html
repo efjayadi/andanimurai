@@ -61,10 +61,6 @@
 
         .section-padding { padding: 150px 0; }
 
-        .parallax-layer {
-            transition: transform 0.1s ease-out;
-        }
-
         .glass-card {
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(15px);
@@ -91,11 +87,11 @@
         <path d="M50 20 C30 20 20 40 20 60 C20 80 40 95 50 95 C60 95 80 80 80 60 C80 40 70 20 50 20 M45 35 Q50 30 55 35" fill="white" />
     </svg>
 
-    <nav class="fixed top-0 w-full z-[100] px-10 py-10 flex justify-between items-center bg-gradient-to-b from-[#030a16] to-transparent">
-        <a href="#" class="text-xl font-extrabold tracking-[0.4em] serif uppercase">
+    <nav class="fixed top-0 w-full z-[100] px-4 md:px-10 py-6 md:py-10 flex flex-col md:flex-row justify-between items-center bg-gradient-to-b from-[#030a16] via-[#030a16]/80 to-transparent gap-4 md:gap-0">
+        <a href="#" class="text-lg md:text-xl font-extrabold tracking-[0.3em] md:tracking-[0.4em] serif uppercase text-center">
             ANDANI <span class="text-[var(--brand-red)]">MURAI</span>
         </a>
-        <div class="hidden md:flex space-x-12 text-[10px] uppercase tracking-[0.5em] font-bold opacity-60">
+        <div class="flex justify-center gap-3 md:gap-12 text-[8px] sm:text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.5em] font-bold opacity-90 md:opacity-60">
             <a href="#filosofi" class="hover:text-[var(--brand-red)] transition-colors">Filosofi</a>
             <a href="#siklus" class="hover:text-[var(--brand-red)] transition-colors">Proses</a>
             <a href="#galeri" class="hover:text-[var(--brand-red)] transition-colors">Prestasi</a>
@@ -112,7 +108,7 @@
         </video>
         <canvas id="output-canvas"></canvas>
 
-        <div class="z-10 text-center md:text-right max-w-4xl parallax-layer w-full mt-4 md:mt-0" data-speed="0.2">
+        <div class="z-10 text-center md:text-right max-w-4xl w-full mt-4 md:mt-0">
             <h2 class="text-[var(--brand-red)] text-xs font-bold tracking-[0.8em] uppercase mb-4 md:mb-8">
                 Wiwit Saking Trah Pinilih
             </h2>
@@ -133,7 +129,7 @@
     <!-- Filosofi Semar -->
     <section id="filosofi" class="relative section-padding px-10 md:px-32 bg-white/5 backdrop-blur-sm">
         <div class="grid md:grid-cols-2 gap-20 items-center">
-            <div class="parallax-layer" data-speed="0.1">
+            <div>
                 <h3 class="serif text-5xl mb-8">Karakter Semar, <br><span class="text-[var(--brand-red)]">Suara Kristal.</span></h3>
                 <p class="text-gray-400 leading-relaxed mb-6">
                     Dalam pewayangan, Semar adalah simbol stabilitas dan kekuatan tersembunyi. Demikian pula burung di Andani Murai; tampil tenang, namun memiliki letupan volume dan variasi isian yang menggetarkan arena.
@@ -289,16 +285,6 @@
 
         // Mulai loop animasi
         computeFrame();
-
-        // Event listener untuk scroll parallax
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            
-            document.querySelectorAll('.parallax-layer').forEach(layer => {
-                const speed = layer.getAttribute('data-speed');
-                layer.style.transform = `translateY(${scrolled * speed}px)`;
-            });
-        });
 
         // Fungsi pemicu jika autoplay diblokir browser
         function showStartTrigger() {
