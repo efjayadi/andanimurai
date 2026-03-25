@@ -42,6 +42,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: left bottom; /* Mengatur jangkar burung ke kiri bawah pada desktop */
             z-index: 50; 
             pointer-events: none;
             filter: drop-shadow(0 0 30px rgba(0,0,0,0.8));
@@ -74,8 +75,12 @@
 
         @media (max-width: 768px) {
             #output-canvas { 
-                width: 200%;
-                left: -50%;
+                top: auto; /* Hapus posisi atas */
+                bottom: 0; /* Taruh di dasar layar */
+                width: 100%; /* Lebar penuh 100% */
+                height: 65vh; /* Ambil hanya 65% tinggi layar agar teks atas tetap terbaca */
+                object-fit: cover;
+                object-position: center bottom; /* Fokus ke tengah dan bawah */
             }
         }
     </style>
@@ -99,7 +104,7 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative h-screen flex items-center justify-end px-10 md:px-32">
+    <section class="relative h-screen flex flex-col md:flex-row items-center justify-start md:justify-end px-6 md:px-32 pt-32 md:pt-0 overflow-hidden">
         
         <!-- Video & Canvas dipindahkan ke dalam Hero Section agar ikut ter-scroll -->
         <video id="video-source" preload="auto" loop muted playsinline autoplay>
@@ -107,18 +112,18 @@
         </video>
         <canvas id="output-canvas"></canvas>
 
-        <div class="z-10 text-right max-w-4xl parallax-layer" data-speed="0.2">
-            <h2 class="text-[var(--brand-red)] text-xs font-bold tracking-[0.8em] uppercase mb-8">
+        <div class="z-10 text-center md:text-right max-w-4xl parallax-layer w-full mt-4 md:mt-0" data-speed="0.2">
+            <h2 class="text-[var(--brand-red)] text-xs font-bold tracking-[0.8em] uppercase mb-4 md:mb-8">
                 Wiwit Saking Trah Pinilih
             </h2>
             
-            <h1 class="serif text-7xl md:text-[10rem] leading-[0.85] font-bold italic mb-10">
+            <h1 class="serif text-6xl md:text-[10rem] leading-[1.1] md:leading-[0.85] font-bold italic mb-6 md:mb-10 text-glow">
                 Laras <br>
-                <span class="not-italic text-transparent" style="-webkit-text-stroke: 1px rgba(255,255,255,0.2);">Wicaksana</span>
+                <span class="not-italic text-transparent" style="-webkit-text-stroke: 1px rgba(255,255,255,0.4);">Wicaksana</span>
             </h1>
             
-            <div class="flex justify-end">
-                <p class="max-w-md text-gray-400 text-sm md:text-base font-light leading-loose tracking-wide italic">
+            <div class="flex justify-center md:justify-end">
+                <p class="max-w-md text-gray-300 md:text-gray-400 text-xs md:text-base font-light leading-relaxed md:leading-loose tracking-wide italic">
                     "Urip Iku Urup." Sebagaimana petuah Eyang Semar, kami percaya keindahan suara Murai adalah cahaya yang menghidupkan semangat sang pemilik di arena laga.
                 </p>
             </div>
@@ -245,33 +250,36 @@
                 const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 const data = frame.data;
 
-                // TARGET BACKGROUND: #00FF00 (Pure Green)
-                const targetR = 0;
-                const targetG = 255;
-                const targetB = 0;
-                
-                // Toleransi deteksi warna (Jarak warna maksimal dari #00FF00)
-                const threshold = 160; 
+                // ALGORITMA CHROMA KEY + SPILL SUPPRESSION (Penghilang Outline Hijau)
+                // Menggunakan rasio channel warna yang lebih canggih
+                const similarityThreshold = 18; // Semakin kecil angka ini, semakin agresif memotong hijau
 
                 for (let i = 0; i < data.length; i += 4) {
                     const r = data[i];
                     const g = data[i + 1];
                     const b = data[i + 2];
 
-                    // Kalkulasi jarak Euclidean warna saat ini terhadap warna target (#00FF00)
-                    const distance = Math.sqrt(
-                        (r - targetR) ** 2 + 
-                        (g - targetG) ** 2 + 
-                        (b - targetB) ** 2
-                    );
+                    // Cari nilai tertinggi antara channel Merah dan Biru
+                    const maxRB = Math.max(r, b);
+                    // Hitung tingkat dominasi hijau (Seberapa hijau piksel ini?)
+                    const greenness = g - maxRB;
 
-                    if (distance < threshold) {
-                        data[i + 3] = 0; // Transparan 100%
-                    } else if (distance < threshold + 35) {
-                        // Feathering: Memberikan efek halus/blur pada perbatasan warna
-                        // Mencegah pinggiran burung terlihat tajam/kasar
-                        const alpha = ((distance - threshold) / 35) * 255;
-                        data[i + 3] = alpha;
+                    if (greenness > similarityThreshold) {
+                        // Jika sangat dominan hijau -> Transparan penuh
+                        data[i + 3] = 0; 
+                    } else if (greenness > -20) {
+                        // JIKA BERADA DI PERBATASAN OUTLINE / HALO (Yang membuat hasil terlihat kasar)
+                        
+                        // 1. SPILL SUPPRESSION: Netralkan warna hijau yang memantul ke bulu burung
+                        // Batasi channel hijau agar tidak mendominasi warna asli bulu
+                        data[i + 1] = Math.min(g, maxRB + 5);
+                        
+                        // 2. FEATHERING (Alpha Blending)
+                        // Buat perbatasan gradasi transparan untuk melembutkan tepian burung
+                        if (greenness > 0) {
+                            const alphaFactor = greenness / similarityThreshold; // Skala 0 hingga 1
+                            data[i + 3] = 255 * (1 - alphaFactor); 
+                        }
                     }
                 }
                 ctx.putImageData(frame, 0, 0);
